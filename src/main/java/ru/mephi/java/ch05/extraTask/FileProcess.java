@@ -31,7 +31,7 @@ public class FileProcess {
             String fileWithErr = "src/main/resources/taskErr";
             FileProcess.getSum(fileWithTask, fileWithResult, fileWithErr);
 
-        } catch (FileFormatException | FileNotFoundException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -39,15 +39,22 @@ public class FileProcess {
     // проверить что в этот момент никто не создал файл
 
 
-    public static void getSum(String fileWithTask, String fileWithResult, String fileWithErr) throws FileNotFoundException, FileFormatException {
+    public static void getSum(String fileWithTask, String fileWithResult, String fileWithErr) throws  Exception {
         File fileTask = new File(fileWithTask);
         File fileRes = new File(fileWithResult);
         File fileErr = new File(fileWithErr);
         Exception exception = null;
+        try {
+            fileErr.createNewFile();
+        } catch (IOException io) {
+            throw new Exception("Путь к файлу с ошибками не корректен", io);
+        }
+
         if (!fileTask.exists()) {
             FileNotFoundException ex = new FileNotFoundException("Путь к файлу с заданиями указан неверно, так как такой файл не" +
                     "существует");
             exception = ex;
+            // throw exception;
         }
         if (fileRes.exists()) {
             FileFormatException ex = new FileFormatException("Путь к файлу с заданиями указан неверно, такой файл уже существует");
@@ -55,73 +62,44 @@ public class FileProcess {
                 ex.addSuppressed(exception);
             }
             throw ex;
-        } else {
+        } else if (exception == null) {
             try {
-                if (fileRes.createNewFile()) ;
+                if (!fileRes.createNewFile()) {
+                    exception = new FileFormatException("Путь к файлу с заданиями указан неверно, такой файл уже существует");
+                }
             } catch (IOException e) {
-
+                exception = new FileFormatException("Путь к файлу с заданиями указан неверно, такой директории не существует", e);
             }
         }
 
-        //if (!fileRes.exists()) {
-        //  throw new FileNotFoundException("Путь к файлу с результатми указан неправильно или данный файл не создан");
-        //}
+
+        if (exception != null) {
+            throw exception;
+        }
 
 
         try {
-            int sum = FileProcess.sum(fileWithTask);
-            if (fileRes.exists()) {
-                try { // ошибка в файле с заданием
-                    throw new FileFormatException("Путь к файлу с результатами указан неверно, так как такой файл уже" +
-                            "существует");
-                } catch (FileFormatException ex) {
-                    if (!fileErr.exists()) {
-                        try (PrintWriter pw = new PrintWriter(fileWithErr)) {
-                            String st = (new Date()).toString() + ": " + ex.getMessage();
-                            pw.write(st);
-                        }
-                        exception = ex;
-                    } else {
-                        FileFormatException ex2 = new FileFormatException(("Путь к файлу с результатами указан неверно, так как такой файл уже" +
-                                "существует"));
-                        ex2.addSuppressed(ex);
-                        exception = ex2;
-
-                    }
-                }
-            }
+            int sum = FileProcess.sum(fileTask);
             try (PrintWriter pw = new PrintWriter(fileRes)) {
                 pw.println(sum);
                 File file = new File(fileWithTask);
                 file.delete();
             }
-        } catch (FileFormatException | FileNotFoundException ex) {
-            if (!fileErr.exists()) {
-                try (PrintWriter pw = new PrintWriter(fileWithErr)) {
-                    String st = (new Date()).toString() + ": " + ex.getMessage();
-                    pw.write(st);
-                }
-                throw ex;
-            } else {
-                FileFormatException ex2 = new FileFormatException(("Путь к файлу с ошибками указан неверно, так как такой файл уже" +
-                        "существует"));
-                ex2.addSuppressed(ex);
-                exception = ex2;
-
+        } catch (FileFormatException ex) {
+            try (PrintWriter pw = new PrintWriter(fileWithErr)) {
+                String st = (new Date()).toString() + ": " + ex.getMessage();
+                pw.write(st);
             }
+            throw ex;
         }
-        if (exception != null) {
-            throw exception;
-        }
+
+
     }
 
-    private static Integer sum(String fileWithTask) throws FileFormatException, FileNotFoundException {
+    private static Integer sum(File fileWithTask) throws FileFormatException, FileNotFoundException {
         Integer sum = null;
-        File file = new File(fileWithTask);
-        if (!file.exists()) {
-            throw new FileNotFoundException("Путь к файлу с заданием указан неправильно или данный файл не создан");
-        }
-        try (Scanner scanner = new Scanner(file)) {
+
+        try (Scanner scanner = new Scanner(fileWithTask)) {
             while (scanner.hasNext()) {
                 String[] str = scanner.nextLine().split(",");
                 if (str.length != 0 && sum == null)
