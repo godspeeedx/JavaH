@@ -7,6 +7,26 @@
     <groupId>org.example</groupId>
     <artifactId>laba-1</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>12</source>
+                    <target>12</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <repositories>
         <!-- Needed for JSON-B API -->
         <repository>
@@ -27,7 +47,11 @@
             <artifactId>yasson</artifactId>
             <version>1.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
+        </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>

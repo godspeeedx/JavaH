@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class Test {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        File file = new File("src/main/resources/f1");
+        System.out.println(file.createNewFile());
       //  Bank bank = new Bank();
        // bank.setPersons();
         //bank.offerDepositExc(12000);
        // bank.offerDepositErrCode(12000);
-        String str = "200";
+       /* String str = "200";
         System.out.println(Integer.parseInt(str));
         File file = new File("src/main/resources/task5.txt");
         try {
@@ -20,6 +22,6 @@ public class Test {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

@@ -18,6 +18,8 @@ package ru.mephi.java.ch05.extraTask;
 
 import javax.xml.crypto.Data;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -26,7 +28,7 @@ public class FileProcess {
 
     public static void main(String[] args) {
         try {
-            String fileWithTask = "src/main/resources/task";
+            String fileWithTask = "src/main/reddsources/task";
             String fileWithResult = "src/main/resources/taskResulting";
             String fileWithErr = "src/main/resources/taskErr";
             FileProcess.getSum(fileWithTask, fileWithResult, fileWithErr);
@@ -35,11 +37,25 @@ public class FileProcess {
             ex.printStackTrace();
         }
     }
-    // сделать меньше catch;
-    // проверить что в этот момент никто не создал файл
+    // сделать меньше catch; +
+    //
+
+    private static void checkFileTask(File fileTask) throws FileNotFoundException {
+        if (!fileTask.exists()) {
+            throw new FileNotFoundException("Путь к файлу с заданиями указан неверно, так как такой файл не" +
+                    "существует");
+        }
+    }
+
+    private static void checkFileRes(File fileRes) throws Exception {
+        if (!fileRes.createNewFile()) {
+            throw new FileFormatException("Файл с результатами уже существует");
+        }
+
+    }
 
 
-    public static void getSum(String fileWithTask, String fileWithResult, String fileWithErr) throws  Exception {
+    private static void getSum(String fileWithTask, String fileWithResult, String fileWithErr) throws Exception {
         File fileTask = new File(fileWithTask);
         File fileRes = new File(fileWithResult);
         File fileErr = new File(fileWithErr);
@@ -50,60 +66,91 @@ public class FileProcess {
             throw new Exception("Путь к файлу с ошибками не корректен", io);
         }
 
-        if (!fileTask.exists()) {
-            FileNotFoundException ex = new FileNotFoundException("Путь к файлу с заданиями указан неверно, так как такой файл не" +
-                    "существует");
-            exception = ex;
-            // throw exception;
-        }
-        if (fileRes.exists()) {
-            FileFormatException ex = new FileFormatException("Путь к файлу с заданиями указан неверно, такой файл уже существует");
+      /*  if (fileRes.exists()) {
+            FileFormatException ex = new FileFormatException("Путь к файлу с результатами указан неверно, такой файл уже существует");
             if (exception != null) {
-                ex.addSuppressed(exception);
+                exception.addSuppressed(ex);
+            } else {
+                exception = ex;
             }
-            throw ex;
         } else if (exception == null) {
             try {
                 if (!fileRes.createNewFile()) {
-                    exception = new FileFormatException("Путь к файлу с заданиями указан неверно, такой файл уже существует");
+                    exception = new FileFormatException("Путь к файлу с заданиями указан неверно, такой файл уже существует или путь указан неверно");
                 }
             } catch (IOException e) {
                 exception = new FileFormatException("Путь к файлу с заданиями указан неверно, такой директории не существует", e);
             }
+        }*/
+    /*
+    else {   Exception ex1 = null;
+            try {
+                if (!fileRes.createNewFile()) {
+                    ex1 = new FileFormatException("Путь к файлу с заданиями указан неверно, такой файл уже существует");
+                }
+            } catch (IOException e) {
+                ex1 = new FileFormatException("Путь к файлу с заданиями указан неверно, такой директории не существует", e);
+            }
+            if (exception != null){
+               exception.addSuppressed(ex1)
+            }
         }
+     */
 
+       /* if (exception != null) {
+            try (PrintWriter pw = new PrintWriter(fileWithErr)) {
 
-        if (exception != null) {
+                String st = (new Date()).toString() + ": " + exception.getMessage();
+                pw.write(st);
+            } catch (Exception ex) {
+                exception.addSuppressed(ex);
+            }
             throw exception;
-        }
+        }*/
 
-
+        /*
+        Гриша, спроси плиз, вот я не смог удалить файл с заданием, значит, я должен буду удалить
+        Файл с результатами и кинуть exception("Не смог удалить файл с заданием"), а если при попытке удалить файл
+        с результами, то к этому исключению ещё супресед добавить
+         */
+        boolean flag = true;
         try {
+            FileProcess.checkFileTask(fileTask);
+            FileProcess.checkFileRes(fileRes);
             int sum = FileProcess.sum(fileTask);
             try (PrintWriter pw = new PrintWriter(fileRes)) {
                 pw.println(sum);
-                File file = new File(fileWithTask);
-                file.delete();
             }
-        } catch (FileFormatException ex) {
+            if (!Files.deleteIfExists(Path.of(fileWithTask))) {
+                throw new FileFormatException("Не удалось удалить файл с заданием");
+            }
+
+        } catch (Exception ex) {
+            try {
+                if (!Files.deleteIfExists(Path.of(fileWithResult))) {
+                    throw new FileFormatException("Не удалось удалить файл с результатом");// Если файл используется в другой программе то его низя удалить
+                }
+            } catch (Exception ex2) {
+                ex.addSuppressed(ex2);
+            }
             try (PrintWriter pw = new PrintWriter(fileWithErr)) {
-                String st = (new Date()).toString() + ": " + ex.getMessage();
-                pw.write(st);
+                ex.printStackTrace(pw);
+            } catch (Exception exx) {
+                ex.addSuppressed(exx);
             }
+
             throw ex;
         }
 
 
     }
 
-    private static Integer sum(File fileWithTask) throws FileFormatException, FileNotFoundException {
-        Integer sum = null;
+    private static int sum(File fileWithTask) throws FileFormatException, FileNotFoundException {
+        int sum = 0;
 
         try (Scanner scanner = new Scanner(fileWithTask)) {
             while (scanner.hasNext()) {
                 String[] str = scanner.nextLine().split(",");
-                if (str.length != 0 && sum == null)
-                    sum = 0;
                 for (String s : str) {
                     s = s.replaceAll("\\s", "");
                     sum += Integer.parseInt(s);

@@ -1,3 +1,7 @@
-Sun Nov 07 09:48:21 MSK 2021: Неверно составлен файл с данными src/main/resources/task Ошибка: For input string: "gh"
-В файле должны быть написаны целые числа через запятую, пробелы между цифрами возможны
-Например: запись "2 0 20" = "2020"
+java.io.FileNotFoundException: Путь к файлу с заданиями указан неверно, так как такой файл несуществует
+	at ru.mephi.java.ch05.extraTask.FileProcess.checkFileTask(FileProcess.java:45)
+	at ru.mephi.java.ch05.extraTask.FileProcess.getSum(FileProcess.java:118)
+	at ru.mephi.java.ch05.extraTask.FileProcess.main(FileProcess.java:34)
+	Suppressed: ru.mephi.java.ch05.extraTask.FileFormatException: Не удалось удалить файл с результатом
+		at ru.mephi.java.ch05.extraTask.FileProcess.getSum(FileProcess.java:130)
+		... 1 more
