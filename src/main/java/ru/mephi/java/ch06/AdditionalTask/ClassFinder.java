@@ -1,9 +1,11 @@
 package ru.mephi.java.ch06.AdditionalTask;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ClassFinder {
     private static final char PKG_SEPARATOR = '.';
@@ -24,8 +26,10 @@ public class ClassFinder {
             throw new IllegalArgumentException(String.format(BAD_PACKAGE_ERROR, scannedPath, scannedPackage));
         }
         File scannedDir = new File(scannedUrl.getFile());
+        File[] sc = scannedDir.listFiles();
+        if(sc == null)  return null;
         List<Class<?>> classes = new ArrayList<>();
-        for (File file : scannedDir.listFiles()) {
+        for (File file : sc) {
             classes.addAll(find(file, scannedPackage));
         }
         return classes;
@@ -35,7 +39,7 @@ public class ClassFinder {
         List<Class<?>> classes = new ArrayList<>();
         String resource = scannedPackage + PKG_SEPARATOR + file.getName();
         if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
+            for (File child : Objects.requireNonNull(file.listFiles())) {
                 classes.addAll(find(child, resource));
             }
         } else if (resource.endsWith(CLASS_FILE_SUFFIX)) {

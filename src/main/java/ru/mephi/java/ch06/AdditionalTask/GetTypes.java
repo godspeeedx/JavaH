@@ -8,9 +8,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GetTypes {
-    /**
-     * @return first LinkedListType of hierarchy types
-     */
+
+    // Проверка вайлд карда на его границы
     public static LinkedListType getLinkedListType(WildcardType wildcardType, Map<String, String> map) {
         LinkedListType linkedListType = null;
         Type[] upper = wildcardType.getUpperBounds();

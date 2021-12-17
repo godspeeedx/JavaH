@@ -8,7 +8,7 @@ package ru.mephi.java.ch06.AdditionalTask;
      */
     public class LinkedListType {
         private String type;
-        private boolean upLow; // upper - true,lower - false
+        private boolean upLow; // upper - true,lower - false, upper - extends, lower super
         private boolean strict;
         private int level;
         private LinkedListType next;
@@ -41,7 +41,7 @@ package ru.mephi.java.ch06.AdditionalTask;
             this.next = new LinkedListType(type, upLow, this.level + 1);
             return this.next;
         }
-
+        // Метод устанавливает родителя, то есть само поле которое мы искали
         public static LinkedListType setInitalParent(String type) {
             return new LinkedListType(type, true, -10, false);
         }
@@ -50,9 +50,7 @@ package ru.mephi.java.ch06.AdditionalTask;
             return type;
         }
 
-        /**
-         * @return true if Upper bound, false if is lower
-         */
+
         public boolean isUpLow() {
             return upLow;
         }

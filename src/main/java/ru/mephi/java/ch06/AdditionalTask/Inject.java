@@ -17,11 +17,16 @@ public class Inject {
 
 
     public static List<Class<?>> check(Object o, String field) throws NoSuchFieldException {
+        // получаем все классы из пакета
         List<Class<?>> cls = ClassFinder.find("ru.mephi.java.ch06.AdditionalTask");
+        //Лист с информацией о поле то есть, есть ли параметрирозованные типы, как они ограничены, как ограничения ограничены и тд
         ArrayList<LinkedListType> arrayList1 = ClassDeclaration.getDeclarationClass(o.getClass(), field);
         List<Class<?>> result = new ArrayList<>();
         for (Class<?> cl : cls) {
+            System.out.println(cl.getGenericSuperclass().toString());
+            // Если это просто класс, то проверяем можно ли его прикастить
                 if ((cl.getGenericSuperclass() instanceof Class)) {
+                    //проверка на то, можно ли данный клас прикастить
                     if (checkClass(cl, arrayList1)) {
                         result.add(cl);
                     }
@@ -38,25 +43,27 @@ public class Inject {
         return result;
     }
 
-    /**
-     * Check inject class  "cl" to field field produced by arrayLista
-     *
-     * @return true if it inject is possible
-     */
+    // проверяем можно ли будет cls сделать inject
     private static Boolean checkParameterizedType(Class<?> cls, ArrayList<LinkedListType> arrayList1) {
         Class<?> fieldClass = null;
+        // Получаем что расширеят данный класс и кастим к параметрирезованному типу
         ParameterizedType type = (ParameterizedType) cls.getGenericSuperclass();
         if (type != null) {
+            // Получаем тайп параметры
             Type[] types = type.getActualTypeArguments();
+            // получаем начальное поле, то есть Класс переменной(без ограничений и тд)
             fieldClass = getFieldClass(null, arrayList1, 0);
             assert fieldClass != null;
+            // проверка на то, можно ли к нашему классу прикастить что-то без ограничений
             if (checkUpperNotStrict(fieldClass, fieldClass.isAssignableFrom(cls))) return false;
             Class<?> parameter;
+            // если можно продолжаем проверять дальше
             for (int i = 0; i < types.length; i++) {
                 if (types[i] instanceof Class<?>) {
                     parameter = (Class<?>) types[i];
                     fieldClass = getFieldClass(fieldClass, arrayList1, i + 1);
                     if (!arrayList1.get(i + 1).isStrict()) {
+                        // проверка можно ли прикастить
                         if (checkStrict(arrayList1, fieldClass, parameter, i)) return false;
                     } else {
                         if (!fieldClass.equals(parameter)) {
@@ -109,21 +116,19 @@ public class Inject {
     private static boolean checkClass(Class<?> cls, ArrayList<LinkedListType> arrayList1) {
         Class<?> fieldClass = getFieldClass(arrayList1.get(0));
         assert fieldClass != null;
+        // Проверка на то, кастится ли класс cls к полю fieldClass
         return fieldClass.isAssignableFrom(cls);
     }
 
-    /**
-     * Check accessible "parameter" to/from typeNext.getType class
-     *
-     * @return true if accessible
-     */
+  // проверяем можно ли дальше присвоить, то есть все ограничения проверям
     private static boolean checkClassHierarchically(LinkedListType typeNext, Class<?> parameter) {
         if (typeNext != null) {
             Class<?> fieldClass = getFieldClass(typeNext);
             assert fieldClass != null;
             if (!typeNext.isStrict()) {
-                if (typeNext.isUpLow())// Upper
+                if (typeNext.isUpLow())//Если верхняя граница
                 {
+                    // Можно ли прикастить
                     if (checkUpperNotStrict(fieldClass, fieldClass.isAssignableFrom(parameter))) return false;
                 } else {
                     if (parameter.getSuperclass() != Object.class && parameter != Object.class) {
@@ -218,7 +223,7 @@ public class Inject {
         }
         return checkUpperNotStrict(fieldClass, parameter.isAssignableFrom(fieldClass));
     }
-
+    // возвращает поле класса
     private static Class<?> getFieldClass(LinkedListType typeNext) {
         Class<?> fieldClass = null;
         try {
@@ -243,31 +248,5 @@ public class Inject {
     public static void main(String[] args) throws NoSuchFieldException {
 
         check(new InjectPoint(), "n").forEach(System.out::println);
-        // Pair<? ex Number> n , Pair<Integer> ...
-        /*TestClass1 testClass1 = new TestClass1();
-        System.out.println("---pair");
-        List<Class<?>> classes1 = Arrays.asList(MyPair1.class, MyPair2.class);
-        check(testClass1, "pair", classes1).forEach(System.out::println);//MyPair1
-        System.out.println("assert : MyPair1");
-
-        System.out.println("---employees");
-        List<Class<?>> classes2 = Arrays.asList(MyList1.class, MyList2.class, MyList5.class);
-        check(testClass1, "employees", classes2).forEach(System.out::println);//MyList1,MyList5
-        System.out.println("assert : MyList1,MyList5");
-
-        System.out.println("---list2");
-        List<Class<?>> classes3 = Arrays.asList(MyList3.class, MyList2.class, MyList4.class);
-        check(testClass1, "list2", classes3).forEach(System.out::println);//MyList1,MyList5
-        System.out.println("assert : MyList3.class");
-
-        System.out.println("---list");
-        List<Class<?>> classes4 = Arrays.asList(MyList3.class, MyList2.class, MyList4.class);
-        check(testClass1, "list", classes4).forEach(System.out::println);
-        System.out.println("assert : MyList3.class,MyList4.class");
-
-        System.out.println("---employee");
-        List<Class<?>> classes5 = Arrays.asList(Manager.class, Employee.class, Double.class, Object.class);
-        check(testClass1, "employee", classes5).forEach(System.out::println);
-        System.out.println("assert :Manager.class,Employee.class");*/
     }
 }

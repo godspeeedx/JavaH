@@ -21,7 +21,7 @@ public class MyStack<T> {
         managerMyStack.popAll(arrayList);
         System.out.println(arrayList.get(0).getName());
         System.out.println(Arrays.toString(arrayList.toArray()));
-
+        Class<?> cl = Integer.class;
 
     }
     public MyStack(){
@@ -35,7 +35,7 @@ public class MyStack<T> {
 
 // В первом случае создаётся массив объектов, в то время как во втором создаётся сразу массив, переданного параметра,
 // В данном случае удобнее первое, так каr
-// метод AL.get() можно усовершнствовать кидая туда класс, а потом кастить с помощью рефлексии
+// метод AL.get() можно усовершнствовать кидая туда класс, а потом кастить с помощью рефлекси
     public MyStack(int initialCapacity, IntFunction<T[]> constr)  {
         elementData = constr.apply(initialCapacity);
     }
