@@ -1,15 +1,11 @@
 package ru.mephi.java.ch06.AdditionalTask;
 
 
-    /**
-     * upLow true if Upper bound, false if is lower
-     * strict true if it is strict bound.
-     * level=-10 is  for parent class
-     */
+
     public class LinkedListType {
         private String type;
         private boolean upLow; // upper - true,lower - false, upper - extends, lower super
-        private boolean strict;
+        private boolean strict;// означает является ли Тайп параметром или нет, true T, False - F
         private int level;
         private LinkedListType next;
 

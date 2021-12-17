@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class ClassDeclaration {
 
-    public static ArrayList<LinkedListType> getDeclarationClass(Class clazz, String field) throws NoSuchFieldException {
+    public static ArrayList<LinkedListType> getDeclarationClass(Class<?> clazz, String field) throws NoSuchFieldException {
         // получаем тайп параметры с границами класса
         Map<String, String> map = typeBounds(clazz);
         // получаем поле класса, которое ищем
@@ -28,7 +28,7 @@ public class ClassDeclaration {
             //Смотрим массив его тайп параметров
             for (int j = 0; j != parameterizedType.getActualTypeArguments().length; j++) {
                 typeName = parameterizedType.getActualTypeArguments()[j].getTypeName();
-                // Тут надо проверить, чё происходит
+                // вместо названия Type параметра пишем его границу
                 typeName = checkReplaceFromMap(map, typeName);
                 if (parameterizedType.getActualTypeArguments()[j] instanceof WildcardType) {
                     WildcardType wildcardType = (WildcardType) parameterizedType.getActualTypeArguments()[j];
@@ -50,7 +50,9 @@ public class ClassDeclaration {
         if (vars.length != 0) {
             result = new HashMap<>(vars.length);
             for (TypeVariable<?> var : vars) {
+                // Граница Тайп параметров
                 Type[] bounds = var.getBounds();
+                // Рассматриваем только первую границу
                 if (bounds[0] instanceof ParameterizedType) {
                     ParameterizedType p = (ParameterizedType) bounds[0];
                     Type[] typeArguments = p.getActualTypeArguments();

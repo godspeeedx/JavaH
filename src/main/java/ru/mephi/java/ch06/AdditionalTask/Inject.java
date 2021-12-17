@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Inject {
     /**
@@ -22,8 +23,8 @@ public class Inject {
         //Лист с информацией о поле то есть, есть ли параметрирозованные типы, как они ограничены, как ограничения ограничены и тд
         ArrayList<LinkedListType> arrayList1 = ClassDeclaration.getDeclarationClass(o.getClass(), field);
         List<Class<?>> result = new ArrayList<>();
-        for (Class<?> cl : cls) {
-            System.out.println(cl.getGenericSuperclass().toString());
+        for (Class<?> cl : Objects.requireNonNull(cls)) {
+          //  System.out.println(cl.getSuperclass().toString());
             // Если это просто класс, то проверяем можно ли его прикастить
                 if ((cl.getGenericSuperclass() instanceof Class)) {
                     //проверка на то, можно ли данный клас прикастить
@@ -31,10 +32,11 @@ public class Inject {
                         result.add(cl);
                     }
                 } else {
+                    // проверяем можно ли прикастить данный класс
                     Boolean resultFlag = checkParameterizedType(cl, arrayList1);
                     if (resultFlag == null) {
                         result.add(cl);
-                    } else if (resultFlag) {
+                    }else if (resultFlag) {
                         result.add(cl);
                     }
                 }
@@ -43,10 +45,10 @@ public class Inject {
         return result;
     }
 
-    // проверяем можно ли будет cls сделать inject
+    // проверяем может ли наше поле ссылать на данный класс
     private static Boolean checkParameterizedType(Class<?> cls, ArrayList<LinkedListType> arrayList1) {
         Class<?> fieldClass = null;
-        // Получаем что расширеят данный класс и кастим к параметрирезованному типу
+        // Получаем родителя класса и кастим к параметрирезованному типу
         ParameterizedType type = (ParameterizedType) cls.getGenericSuperclass();
         if (type != null) {
             // Получаем тайп параметры
@@ -81,12 +83,11 @@ public class Inject {
         } else {
             return checkClass(cls, arrayList1);
         }
+        //return true;
         return null;
     }
 
-    /**
-     * @return Class of field from arrayList1.get(i2)
-     */
+
     private static Class<?> getFieldClass(Class<?> fieldClass, ArrayList<LinkedListType> arrayList1, int i2) {
         try {
             fieldClass = Class.forName(arrayList1.get(i2).getType());
@@ -96,9 +97,7 @@ public class Inject {
         return fieldClass;
     }
 
-    /**
-     * @return assignable strict generic
-     */
+
     private static boolean checkStrict(ArrayList<LinkedListType> arrayList1, Class<?> fieldClass, Class<?> parameter, int i) {
         if (arrayList1.get(i + 1).isUpLow())// Upper
         {
@@ -108,11 +107,7 @@ public class Inject {
         }
     }
 
-    /**
-     * Check assignable from cls to fieldClass
-     *
-     * @return true if it inject is possible
-     */
+
     private static boolean checkClass(Class<?> cls, ArrayList<LinkedListType> arrayList1) {
         Class<?> fieldClass = getFieldClass(arrayList1.get(0));
         assert fieldClass != null;
